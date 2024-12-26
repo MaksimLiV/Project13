@@ -17,10 +17,10 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="RCK-jf-8mE">
-                                <rect key="frame" x="16" y="103" width="361" height="612"/>
+                                <rect key="frame" x="16" y="103" width="361" height="569"/>
                                 <subviews>
                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="zfy-dm-g9b">
-                                        <rect key="frame" x="8" y="8" width="345" height="596"/>
+                                        <rect key="frame" x="8" y="8" width="345" height="553"/>
                                     </imageView>
                                 </subviews>
                                 <color key="backgroundColor" white="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -46,10 +46,10 @@
                                     <action selector="intensityChanged:" destination="BYZ-38-t0r" eventType="valueChanged" id="2Ge-fB-gnl"/>
                                 </connections>
                             </slider>
-                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="O1j-rC-dRf">
-                                <rect key="frame" x="16" y="766" width="128" height="44"/>
+                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="O1j-rC-dRf">
+                                <rect key="frame" x="16" y="766" width="160" height="44"/>
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="128" id="tgm-oB-Rf9"/>
+                                    <constraint firstAttribute="width" constant="160" id="tgm-oB-Rf9"/>
                                 </constraints>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="plain" title="Change Filter"/>
@@ -68,30 +68,50 @@
                                     <action selector="save:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Fo0-Uh-kNI"/>
                                 </connections>
                             </button>
+                            <slider opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.5" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="IFT-xo-01R">
+                                <rect key="frame" x="92" y="694" width="287" height="30"/>
+                                <connections>
+                                    <action selector="radiusChanged:" destination="BYZ-38-t0r" eventType="valueChanged" id="67D-vr-kdP"/>
+                                </connections>
+                            </slider>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Radius:" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Y43-2n-u0M">
+                                <rect key="frame" x="16" y="698" width="56" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="O1j-rC-dRf" firstAttribute="baseline" secondItem="JYU-Do-vAv" secondAttribute="baseline" id="2xs-7n-6mu"/>
                             <constraint firstItem="RCK-jf-8mE" firstAttribute="trailing" secondItem="8bC-Xf-vdC" secondAttribute="trailingMargin" id="ELW-59-2wC"/>
+                            <constraint firstItem="Y43-2n-u0M" firstAttribute="leading" secondItem="vgN-Pn-WaA" secondAttribute="leading" id="EXh-cr-7It"/>
                             <constraint firstItem="RCK-jf-8mE" firstAttribute="trailing" secondItem="I9g-HC-SDO" secondAttribute="trailing" id="Gn7-ui-Hnj"/>
                             <constraint firstItem="vgN-Pn-WaA" firstAttribute="centerY" secondItem="I9g-HC-SDO" secondAttribute="centerY" id="Kcx-zG-oSe"/>
                             <constraint firstAttribute="bottom" secondItem="I9g-HC-SDO" secondAttribute="bottom" constant="90" id="LP0-Q3-coU"/>
+                            <constraint firstAttribute="bottom" secondItem="RCK-jf-8mE" secondAttribute="bottom" constant="180" id="NAY-IO-6pv"/>
                             <constraint firstItem="RCK-jf-8mE" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="NgG-Uv-jRn"/>
                             <constraint firstItem="I9g-HC-SDO" firstAttribute="leading" secondItem="vgN-Pn-WaA" secondAttribute="trailing" constant="8" id="OB8-AQ-X0g"/>
-                            <constraint firstItem="I9g-HC-SDO" firstAttribute="top" secondItem="RCK-jf-8mE" secondAttribute="bottom" constant="18" id="Q4z-Dc-lqQ"/>
+                            <constraint firstItem="I9g-HC-SDO" firstAttribute="top" secondItem="IFT-xo-01R" secondAttribute="bottom" constant="10" id="cZC-oZ-ILB"/>
                             <constraint firstItem="RCK-jf-8mE" firstAttribute="leading" secondItem="vgN-Pn-WaA" secondAttribute="leading" id="ecC-sW-dZH"/>
+                            <constraint firstItem="IFT-xo-01R" firstAttribute="trailing" secondItem="I9g-HC-SDO" secondAttribute="trailing" id="mw3-mf-xy8"/>
                             <constraint firstItem="O1j-rC-dRf" firstAttribute="top" secondItem="I9g-HC-SDO" secondAttribute="bottom" constant="4" id="nHX-oz-1tt"/>
+                            <constraint firstItem="Y43-2n-u0M" firstAttribute="centerY" secondItem="IFT-xo-01R" secondAttribute="centerY" id="r4F-2a-uQe"/>
                             <constraint firstItem="vgN-Pn-WaA" firstAttribute="leading" secondItem="O1j-rC-dRf" secondAttribute="leading" id="sPU-hY-wLL"/>
                             <constraint firstItem="I9g-HC-SDO" firstAttribute="trailing" secondItem="JYU-Do-vAv" secondAttribute="trailing" id="vvN-NY-wp3"/>
                             <constraint firstItem="RCK-jf-8mE" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="xOO-uy-YW1"/>
                             <constraint firstItem="O1j-rC-dRf" firstAttribute="top" secondItem="vgN-Pn-WaA" secondAttribute="bottom" constant="8" id="xeF-rU-QSx"/>
+                            <constraint firstItem="IFT-xo-01R" firstAttribute="leading" secondItem="I9g-HC-SDO" secondAttribute="leading" id="yJZ-Og-Mc1"/>
+                            <constraint firstItem="IFT-xo-01R" firstAttribute="top" secondItem="RCK-jf-8mE" secondAttribute="bottom" constant="22" id="yV7-W5-Rtj"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="Bcd-e3-G6p"/>
                     <connections>
+                        <outlet property="changeFilterButton" destination="O1j-rC-dRf" id="5oZ-bw-z5l"/>
                         <outlet property="imageView" destination="zfy-dm-g9b" id="1fl-0U-8Ry"/>
                         <outlet property="intensity" destination="I9g-HC-SDO" id="AHz-OS-qfH"/>
+                        <outlet property="radiusSlider" destination="IFT-xo-01R" id="Gh6-WG-M24"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>

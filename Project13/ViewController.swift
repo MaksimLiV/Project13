@@ -11,6 +11,9 @@ import UIKit
 class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     @IBOutlet var imageView: UIImageView!
     @IBOutlet var intensity: UISlider!
+    @IBOutlet var changeFilterButton: UIButton!
+    @IBOutlet var radiusSlider: UISlider!
+    
     var currentImage: UIImage!
     
     var context: CIContext!
@@ -24,6 +27,8 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         
         context = CIContext()
         currentFilter = CIFilter(name: "CISepiaTone")
+        
+        changeFilterButton.tag = 100
     }
     
     @objc func importPicture() {
@@ -35,7 +40,13 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     }
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-        guard let image = info[.editedImage] as? UIImage ?? info[.originalImage] as? UIImage else { return }
+        guard let image = info[.editedImage] as? UIImage ?? info[.originalImage] as? UIImage else {
+            let ac = UIAlertController(title: "Loading Error", message: "Unable to load the selected image.", preferredStyle: .alert)
+            ac.addAction(UIAlertAction(title: "OK", style: .default))
+            present(ac, animated: true)
+            return
+        }
+        
         dismiss(animated: true)
         currentImage = image
         
@@ -72,8 +83,11 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
             return
         }
         
-        currentFilter = CIFilter(name: action.title!)
+        guard let actionTitle = action.title else { return }
+        currentFilter = CIFilter(name: actionTitle)
         currentFilter.setDefaults()
+        
+        changeFilterButton.setTitle(actionTitle, for: .normal)
         
         let beginImage = CIImage(image: currentImage)
         currentFilter.setValue(beginImage, forKey: kCIInputImageKey)
@@ -82,12 +96,20 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     
     @IBAction func save(_ sender: Any) {
         guard let image = imageView.image else {
-            let ac = UIAlertController(title: "Save Error", message: "There is no image to save.", preferredStyle: .alert)
+            let ac = UIAlertController(title: "Save Error",
+                                       message: "There is no image to save. Please select and edit an image first.",
+                                       preferredStyle: .alert)
             ac.addAction(UIAlertAction(title: "OK", style: .default))
             present(ac, animated: true)
             return
         }
+        
+        let loadingAC = UIAlertController(title: nil, message: "Saving...", preferredStyle: .alert)
+        present(loadingAC, animated: true)
+        
         UIImageWriteToSavedPhotosAlbum(image, self, #selector(image(_:didFinishSavingWithError:contextInfo:)), nil)
+        
+        loadingAC.dismiss(animated: true)
     }
     
     @objc func image(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
@@ -102,17 +124,53 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         }
     }
     @IBAction func intensityChanged(_ sender: Any) {
+        guard currentImage != nil else { return }
+        let intensityValue = intensity.value
+        updateIntensity(intensityValue)
         applyProcessing()
     }
     
+    
+    @IBAction func radiusChanged(_ sender: Any) {
+        guard currentImage != nil else { return }
+        let radiusValue = radiusSlider.value
+        
+        if currentFilter.inputKeys.contains(kCIInputRadiusKey) {
+            updateRadius(radiusValue)
+            applyProcessing()
+        }
+    }
+    
+    func updateIntensity(_ value: Float) {
+        guard let inputKeys = currentFilter?.inputKeys,
+              inputKeys.contains(kCIInputIntensityKey) else { return }
+        
+        currentFilter.setValue(value, forKey: kCIInputIntensityKey)
+    }
+    
+    func updateRadius(_ value: Float) {
+        guard let inputKeys = currentFilter?.inputKeys,
+              inputKeys.contains(kCIInputRadiusKey) else { return }
+        
+        let radiusValue = value * 200
+        currentFilter.setValue(radiusValue, forKey: kCIInputRadiusKey)
+    }
+    
     func applyProcessing() {
-        let inputKeys = currentFilter.inputKeys
+        guard let inputKeys = currentFilter?.inputKeys,
+              let beginImage = CIImage(image: currentImage) else { return }
+        
+        currentFilter.setValue(beginImage, forKey: kCIInputImageKey)
+        
+        // Обработка интенсивности
         if inputKeys.contains(kCIInputIntensityKey) {
             currentFilter.setValue(intensity.value, forKey: kCIInputIntensityKey)
         }
         
+        // Обработка радиуса
         if inputKeys.contains(kCIInputRadiusKey) {
-            currentFilter.setValue(intensity.value * 200, forKey: kCIInputRadiusKey)
+            let radiusValue = radiusSlider.value * 100
+            currentFilter.setValue(radiusValue, forKey: kCIInputRadiusKey)
         }
         
         if inputKeys.contains(kCIInputScaleKey) {
@@ -123,11 +181,14 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
             currentFilter.setValue(CIVector(x: currentImage.size.width / 2, y: currentImage.size.height / 2), forKey: kCIInputCenterKey)
         }
         
-        guard let outputImage = currentFilter.outputImage else { return }
+        guard let outputImage = currentFilter?.outputImage,
+              let cgImage = context.createCGImage(outputImage, from: outputImage.extent) else { return }
         
-        if let cgImage = context.createCGImage(outputImage, from: outputImage.extent) {
-            let processedImage = UIImage(cgImage: cgImage)
-            imageView.image = processedImage
-        }
+        let processedImage = UIImage(cgImage: cgImage)
+        imageView.image = processedImage
     }
 }
+
+
+
+
