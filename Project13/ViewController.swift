@@ -15,7 +15,6 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     @IBOutlet var radiusSlider: UISlider!
     
     var currentImage: UIImage!
-    
     var context: CIContext!
     var currentFilter: CIFilter!
     
@@ -26,9 +25,12 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(importPicture))
         
         context = CIContext()
+        guard CIFilter(name: "CISepiaTone") != nil else {
+            fatalError("Unable to create CISepiaTone filter")
+        }
         currentFilter = CIFilter(name: "CISepiaTone")
-        
-        changeFilterButton.tag = 100
+        intensity.value = intensity.minimumValue
+        radiusSlider.value = radiusSlider.minimumValue
     }
     
     @objc func importPicture() {
@@ -84,7 +86,13 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         }
         
         guard let actionTitle = action.title else { return }
-        currentFilter = CIFilter(name: actionTitle)
+        guard let filter = CIFilter(name: actionTitle) else {
+            let ac = UIAlertController(title: "Filter Error", message: "Unable to create filter.", preferredStyle: .alert)
+            ac.addAction(UIAlertAction(title: "OK", style: .default))
+            present(ac, animated: true)
+            return
+        }
+        currentFilter = filter
         currentFilter.setDefaults()
         
         changeFilterButton.setTitle(actionTitle, for: .normal)
@@ -96,23 +104,22 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     
     @IBAction func save(_ sender: Any) {
         guard let image = imageView.image else {
-            let ac = UIAlertController(title: "Save Error",
-                                       message: "There is no image to save. Please select and edit an image first.",
-                                       preferredStyle: .alert)
+            let ac = UIAlertController(title: "Save Error", message: "There is no image to save. Please select and edit an image first.", preferredStyle: .alert)
             ac.addAction(UIAlertAction(title: "OK", style: .default))
             present(ac, animated: true)
             return
         }
         
         let loadingAC = UIAlertController(title: nil, message: "Saving...", preferredStyle: .alert)
+        loadingAC.view.tag = 100 // Добавлен тег для последующего удаления
         present(loadingAC, animated: true)
         
         UIImageWriteToSavedPhotosAlbum(image, self, #selector(image(_:didFinishSavingWithError:contextInfo:)), nil)
-        
-        loadingAC.dismiss(animated: true)
     }
     
     @objc func image(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
+        view.window?.viewWithTag(100)?.removeFromSuperview()
+        
         if let error = error {
             let ac = UIAlertController(title: "Save error", message: error.localizedDescription, preferredStyle: .alert)
             ac.addAction(UIAlertAction(title: "OK", style: .default))
@@ -134,12 +141,10 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     @IBAction func radiusChanged(_ sender: Any) {
         guard currentImage != nil else { return }
         let radiusValue = radiusSlider.value
-        
-        if currentFilter.inputKeys.contains(kCIInputRadiusKey) {
-            updateRadius(radiusValue)
-            applyProcessing()
-        }
+        updateRadius(radiusValue)
+        applyProcessing()
     }
+    
     
     func updateIntensity(_ value: Float) {
         guard let inputKeys = currentFilter?.inputKeys,
@@ -162,15 +167,8 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         
         currentFilter.setValue(beginImage, forKey: kCIInputImageKey)
         
-        // Обработка интенсивности
         if inputKeys.contains(kCIInputIntensityKey) {
             currentFilter.setValue(intensity.value, forKey: kCIInputIntensityKey)
-        }
-        
-        // Обработка радиуса
-        if inputKeys.contains(kCIInputRadiusKey) {
-            let radiusValue = radiusSlider.value * 100
-            currentFilter.setValue(radiusValue, forKey: kCIInputRadiusKey)
         }
         
         if inputKeys.contains(kCIInputScaleKey) {
@@ -181,14 +179,16 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
             currentFilter.setValue(CIVector(x: currentImage.size.width / 2, y: currentImage.size.height / 2), forKey: kCIInputCenterKey)
         }
         
-        guard let outputImage = currentFilter?.outputImage,
-              let cgImage = context.createCGImage(outputImage, from: outputImage.extent) else { return }
-        
-        let processedImage = UIImage(cgImage: cgImage)
-        imageView.image = processedImage
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self = self,
+                  let outputImage = self.currentFilter.outputImage,
+                  let cgImage = self.context.createCGImage(outputImage, from: outputImage.extent) else { return }
+            
+            let processedImage = UIImage(cgImage: cgImage)
+            
+            DispatchQueue.main.async {
+                self.imageView.image = processedImage
+            }
+        }
     }
 }
-
-
-
-
