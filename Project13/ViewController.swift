@@ -111,7 +111,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         }
         
         let loadingAC = UIAlertController(title: nil, message: "Saving...", preferredStyle: .alert)
-        loadingAC.view.tag = 100 // Добавлен тег для последующего удаления
+        loadingAC.view.tag = 100 
         present(loadingAC, animated: true)
         
         UIImageWriteToSavedPhotosAlbum(image, self, #selector(image(_:didFinishSavingWithError:contextInfo:)), nil)
