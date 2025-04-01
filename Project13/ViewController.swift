@@ -52,6 +52,12 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         dismiss(animated: true)
         currentImage = image
         
+        imageView.alpha = 0
+        imageView.image = image
+        UIView.animate(withDuration: 0.3) {
+            self.imageView.alpha = 1
+        }
+        
         let beginImage = CIImage(image: currentImage)
         currentFilter.setValue(beginImage, forKey: kCIInputImageKey)
         applyProcessing()
@@ -111,7 +117,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         }
         
         let loadingAC = UIAlertController(title: nil, message: "Saving...", preferredStyle: .alert)
-        loadingAC.view.tag = 100 
+        loadingAC.view.tag = 100
         present(loadingAC, animated: true)
         
         UIImageWriteToSavedPhotosAlbum(image, self, #selector(image(_:didFinishSavingWithError:contextInfo:)), nil)
@@ -187,7 +193,11 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
             let processedImage = UIImage(cgImage: cgImage)
             
             DispatchQueue.main.async {
+                self.imageView.alpha = 0
                 self.imageView.image = processedImage
+                UIView.animate(withDuration: 0.3) {
+                    self.imageView.alpha = 1
+                }
             }
         }
     }
